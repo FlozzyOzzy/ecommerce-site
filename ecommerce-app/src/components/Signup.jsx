@@ -2,9 +2,10 @@ import axios from "axios"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 
+const inputClassName =
+  "block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-base text-gray-800 shadow-sm transition placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm"
 
 const Signup = () => {
-  // states for user inputs
   const [firstname, setFirstname] = useState('')
   const [lastname, setLastname] = useState('')
   const [email, setEmail] = useState('')
@@ -15,14 +16,12 @@ const Signup = () => {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
-
-  // function to post user inputs to the flask api
-  const submit = async(e) => {
-    // preventing default behavior of forms reloading
+  const submit = async (e) => {
     e.preventDefault()
     setLoading("Please wait as we upload your data!")
+    setError('')
+    setSuccess('')
 
-    // adding data to the new form data
     const data = new FormData()
     data.append("firstname", firstname)
     data.append("lastname", lastname)
@@ -30,15 +29,12 @@ const Signup = () => {
     data.append("phone", phone)
     data.append("password", password)
 
-    // posting user input to the flask backend api
     try {
-      const response = await axios.post("http://127.0.0.1:5000/api/signup" , data)
+      const response = await axios.post("http://127.0.0.1:5000/api/signup", data)
       setLoading("")
-      // update the sucess message
       setSuccess(response.data.success)
       navigate("/")
 
-      // clear all the user inputs
       setFirstname("")
       setLastname("")
       setEmail("")
@@ -49,46 +45,119 @@ const Signup = () => {
       setError(error.message)
     }
   }
+
   return (
-    <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form className="space-y-6" onSubmit={submit}>
-            {loading}
-            {success}
-            {error}
-            <h2 className="font-sans! text-4xl! text-gray-800!">Signup</h2>
-            <input 
-            type="text" 
-            placeholder='First name' 
-            value={firstname}
-            onChange={(e) => setFirstname(e.target.value)}
-            className="block w-full rounded-md px-3 py-1.5 text-base outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"/> <br />
-            <input 
-            type="text" 
-            placeholder='Last name' 
-             value={lastname}
-            onChange={(e) => setLastname(e.target.value)}
-            className="block w-full rounded-md px-3 py-1.5 text-base outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"/> <br />
-            <input 
-            type="email" 
-            placeholder='Email' 
-             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="block w-full rounded-md px-3 py-1.5 text-base outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"/> <br />
-            <input 
-            type="tel" 
-            placeholder='Phone' 
-             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="block w-full rounded-md px-3 py-1.5 text-base outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"/> <br />
-            <input 
-            type="password" 
-            placeholder='Password' 
-             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="block w-full rounded-md px-3 py-1.5 text-base outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"/> <br />
-            <button type='submit' className="bg-blue-600 text-white px-4 py-2 my-4 rounded">Signup</button>
-        </form>
-        <h2>Already have an account? <Link to="/signin">Sign In</Link></h2>
+    <div className="flex flex-col items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md">
+        <div className="rounded-2xl border border-gray-200 bg-white px-8 py-10 shadow-lg">
+          <div className="mb-8 text-center">
+            <h2 className="font-sans text-4xl text-gray-900">Signup</h2>
+            <p className="mt-2 text-sm text-gray-800">Create your account to get started</p>
+          </div>
+
+          {(loading || success || error) && (
+            <div className="mb-6 space-y-2">
+              {loading && (
+                <p className="rounded-lg bg-gray-100 px-4 py-3 text-sm text-gray-600">{loading}</p>
+              )}
+              {success && (
+                <p className="rounded-lg bg-gray-100 px-4 py-3 text-sm text-gray-800">{success}</p>
+              )}
+              {error && (
+                <p className="rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-800">
+                  {error}
+                </p>
+              )}
+            </div>
+          )}
+
+          <form className="space-y-5" onSubmit={submit}>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div>
+                <label htmlFor="firstname" className="mb-1.5 block text-left text-sm font-medium text-gray-900">
+                  First name
+                </label>
+                <input
+                  id="firstname"
+                  type="text"
+                  placeholder="John"
+                  value={firstname}
+                  onChange={(e) => setFirstname(e.target.value)}
+                  className={inputClassName}
+                />
+              </div>
+              <div>
+                <label htmlFor="lastname" className="mb-1.5 block text-left text-sm font-medium text-gray-900">
+                  Last name
+                </label>
+                <input
+                  id="lastname"
+                  type="text"
+                  placeholder="Doe"
+                  value={lastname}
+                  onChange={(e) => setLastname(e.target.value)}
+                  className={inputClassName}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="email" className="mb-1.5 block text-left text-sm font-medium text-gray-900">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                placeholder="john@gmail.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClassName}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="phone" className="mb-1.5 block text-left text-sm font-medium text-gray-900">
+                Phone
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                placeholder="07XXXX"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className={inputClassName}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="mb-1.5 block text-left text-sm font-medium text-gray-900">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={inputClassName}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="mt-2 w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            >
+              Signup
+            </button>
+          </form>
+
+          <p className="mt-8 text-center text-sm text-gray-800">
+            Already have an account?{" "}
+            <Link to="/signin" className="font-medium text-blue-600 hover:text-blue-700">
+              Sign In
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
