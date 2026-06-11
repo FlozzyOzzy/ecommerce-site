@@ -3,6 +3,7 @@ import './App.css'
 import Signin from './components/Signin'
 import Signup from './components/Signup'
 import GetProducts from './components/GetProducts'
+import AddProducts from './components/AddProducts'
 import Landingpage from './components/Landingpage'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
               <Route path='/signup' element={<Signup />} />
               <Route path='/signin' element={<Signin />} />
               <Route path='/getproducts' element={<GetProducts />} />
+              <Route path='/addproducts' element={<AddProducts />} />
               <Route path='/' element= {<Landingpage/>} />
             </Routes>
           </main>
