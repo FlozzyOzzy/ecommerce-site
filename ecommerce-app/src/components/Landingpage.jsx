@@ -13,40 +13,12 @@ const Landingpage = () => {
   }
 
   return (
-    <div className="relative flex min-h-svh flex-col overflow-hidden bg-gray-50">
+    <div className="relative flex flex-1 flex-col overflow-hidden bg-gray-50">
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="landing-blob absolute -left-24 top-32 h-72 w-72 rounded-full bg-amber-100/50 blur-3xl" />
         <div className="landing-blob-delayed absolute right-0 top-40 h-80 w-80 rounded-full bg-gray-200/60 blur-3xl" />
         <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-blue-100/40 blur-3xl" />
       </div>
-
-      <nav className="bg-gray-900">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-lg font-bold text-white shadow-md">
-              E
-            </span>
-            <div className="text-left">
-              <p className="text-sm font-semibold text-white">Ecommerce Site</p>
-              <p className="text-xs text-gray-400">Your everyday marketplace</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              to="/signin"
-              className="rounded-lg px-4 py-2 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/signup"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-            >
-              Sign Up
-            </Link>
-          </div>
-        </div>
-      </nav>
 
       <section
         className="mx-auto grid w-full max-w-6xl flex-1 items-center gap-10 px-4 py-10 sm:px-6 lg:grid-cols-2 lg:gap-14 lg:px-8 lg:py-16"
@@ -110,23 +82,6 @@ const Landingpage = () => {
           </div>
         </div>
       </section>
-
-      <footer className="mt-auto bg-gray-900">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-4 py-6 sm:flex-row sm:px-6 lg:px-8">
-          <p className="text-sm text-gray-400">© 2026 Ecommerce Site. All rights reserved.</p>
-          <div className="flex gap-6">
-            <Link to="/getproducts" className="text-sm text-gray-300 transition hover:text-white">
-              Products
-            </Link>
-            <Link to="/signin" className="text-sm text-gray-300 transition hover:text-white">
-              Sign In
-            </Link>
-            <Link to="/signup" className="text-sm font-medium text-amber-500 transition hover:text-amber-400">
-              Sign Up
-            </Link>
-          </div>
-        </div>
-      </footer>
 
       <style>{`
         @keyframes landing-float {

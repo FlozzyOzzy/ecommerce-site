@@ -1,6 +1,6 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import AddToCartButton from "./AddToCartButton"
 
 const IMG_URL = "http://127.0.0.1:5000/static/images/"
 
@@ -28,12 +28,7 @@ const ProductCard = ({ product }) => (
         <p className="text-xl font-bold text-gray-900">
           Ksh {Number(product.price).toFixed(2)}
         </p>
-        <button
-          type="button"
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-        >
-          Add to Cart
-        </button>
+        <AddToCartButton product_id={product.product_id} />
       </div>
     </div>
   </article>
@@ -68,9 +63,7 @@ const GetProducts = () => {
   }, [])
 
   return (
-    <div className="relative flex min-h-svh flex-col bg-gray-50">
-     
-
+    <div className="relative flex flex-1 flex-col bg-gray-50">
       <section className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-10 text-left">
           <span className="inline-flex items-center rounded-full bg-amber-500 px-4 py-1.5 text-xs font-semibold text-white shadow-sm">
@@ -106,28 +99,11 @@ const GetProducts = () => {
         {!loading && !error && products.length > 0 && (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.product_id} product={product} />
             ))}
           </div>
         )}
       </section>
-
-      <footer className="mt-auto bg-gray-900">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-4 py-6 sm:flex-row sm:px-6 lg:px-8">
-          <p className="text-sm text-gray-400">© 2026 Ecommerce Site. All rights reserved.</p>
-          <div className="flex gap-6">
-            <Link to="/" className="text-sm text-gray-300 transition hover:text-white">
-              Home
-            </Link>
-            <Link to="/signin" className="text-sm text-gray-300 transition hover:text-white">
-              Sign In
-            </Link>
-            <Link to="/signup" className="text-sm font-medium text-amber-500 transition hover:text-amber-400">
-              Sign Up
-            </Link>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }

@@ -142,6 +142,234 @@ def get_product_details():
 
 
 
+# cart add API
+# creating the route
+@app.route('/api/cart/add', methods = ['POST'])
+# define the corresponding web application function
+def cart_add():
+    # get user inputs
+    user_id = request.form.get('user_id')
+    product_id = request.form.get('product_id')
+    quantity = request.form.get('quantity')
+
+    # validate required inputs
+    if not user_id or not product_id or not quantity:
+        return jsonify({"message": "user_id, product_id and quantity are required"})
+
+    # validate quantity is greater than zero
+    if int(quantity) <= 0:
+        return jsonify({"message": "quantity must be greater than zero"})
+
+    # connecting to the database
+    connection = pymysql.connect(user= 'root', host= 'localhost', password='', database= 'ecommerce')
+    # defining the cursor
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    # check if product exists
+    sql = "select product_id from products where product_id = %s"
+    data = (product_id,)
+    cursor.execute(sql, data)
+    if cursor.rowcount == 0:
+        connection.close()
+        return jsonify({"message": "Product not found"})
+
+    # check if cart exists for user
+    sql = "select id from cart where user_id = %s"
+    data = (user_id,)
+    cursor.execute(sql, data)
+
+    # create cart if user does not have one yet
+    if cursor.rowcount == 0:
+        sql = "insert into cart (user_id) values (%s)"
+        data = (user_id,)
+        cursor.execute(sql, data)
+        connection.commit()
+        cart_id = cursor.lastrowid
+    else:
+        cart = cursor.fetchone()
+        cart_id = cart['id']
+
+    # check if product is already in the cart
+    sql = "select id, quantity from cart_items where cart_id = %s and product_id = %s"
+    data = (cart_id, product_id)
+    cursor.execute(sql, data)
+
+    # update quantity if product already exists in cart
+    if cursor.rowcount > 0:
+        cart_item = cursor.fetchone()
+        item_id = cart_item['id']
+        new_quantity = int(cart_item['quantity']) + int(quantity)
+        sql = "update cart_items set quantity = %s where id = %s"
+        data = (new_quantity, item_id)
+        cursor.execute(sql, data)
+        connection.commit()
+    else:
+        # insert new cart item if product is not in cart yet
+        sql = "insert into cart_items (cart_id, product_id, quantity) values (%s, %s, %s)"
+        data = (cart_id, product_id, quantity)
+        cursor.execute(sql, data)
+        connection.commit()
+        item_id = cursor.lastrowid
+
+    # get updated cart item details with product info
+    sql = """select cart_items.id, cart_items.product_id, cart_items.quantity,
+             products.title, products.description, products.price, products.image
+             from cart_items
+             join products on cart_items.product_id = products.product_id
+             where cart_items.id = %s"""
+    data = (item_id,)
+    cursor.execute(sql, data)
+    item = cursor.fetchone()
+    connection.close()
+
+    # return success message with item details
+    return jsonify({"message": "Product added to cart", "item": item})
+
+
+
+
+# cart update API
+# creating the route
+@app.route('/api/cart/items/<item_id>', methods = ['PUT'])
+# define the corresponding web application function
+def cart_update(item_id):
+    # get user input
+    quantity = request.form.get('quantity')
+
+    # validate required input
+    if not quantity:
+        return jsonify({"message": "quantity is required"})
+
+    # validate quantity is greater than zero
+    if int(quantity) <= 0:
+        return jsonify({"message": "quantity must be greater than zero"})
+
+    # connecting to the database
+    connection = pymysql.connect(user= 'root', host= 'localhost', password='', database= 'ecommerce')
+    # defining the cursor
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    # check if cart item exists
+    sql = "select id from cart_items where id = %s"
+    data = (item_id,)
+    cursor.execute(sql, data)
+    if cursor.rowcount == 0:
+        connection.close()
+        return jsonify({"message": "Cart item not found"})
+
+    # update cart item quantity
+    sql = "update cart_items set quantity = %s where id = %s"
+    data = (quantity, item_id)
+    cursor.execute(sql, data)
+    connection.commit()
+
+    # get updated cart item details with product info
+    sql = """select cart_items.id, cart_items.product_id, cart_items.quantity,
+             products.title, products.description, products.price, products.image
+             from cart_items
+             join products on cart_items.product_id = products.product_id
+             where cart_items.id = %s"""
+    data = (item_id,)
+    cursor.execute(sql, data)
+    item = cursor.fetchone()
+    connection.close()
+
+    # return updated item details
+    return jsonify({"message": "Cart item updated", "item": item})
+
+
+
+
+# cart delete API
+# creating the route
+@app.route('/api/cart/items/<item_id>', methods = ['DELETE'])
+# define the corresponding web application function
+def cart_delete(item_id):
+    # connecting to the database
+    connection = pymysql.connect(user= 'root', host= 'localhost', password='', database= 'ecommerce')
+    # defining the cursor
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    # check if cart item exists
+    sql = "select id from cart_items where id = %s"
+    data = (item_id,)
+    cursor.execute(sql, data)
+    if cursor.rowcount == 0:
+        connection.close()
+        return jsonify({"message": "Cart item not found"})
+
+    # delete cart item
+    sql = "delete from cart_items where id = %s"
+    data = (item_id,)
+    cursor.execute(sql, data)
+    connection.commit()
+    connection.close()
+
+    # return success message
+    return jsonify({"message": "Cart item removed successfully"})
+
+
+
+
+# cart get API
+# creating the route
+@app.route('/api/cart', methods = ['GET'])
+# define the corresponding web application function
+def cart_get():
+    # get user input
+    user_id = request.args.get('user_id')
+
+    # validate required input
+    if not user_id:
+        return jsonify({"message": "user_id is required"})
+
+    # connecting to the database
+    connection = pymysql.connect(user= 'root', host= 'localhost', password='', database= 'ecommerce')
+    # defining the cursor
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    # check if cart exists for user
+    sql = "select id, user_id from cart where user_id = %s"
+    data = (user_id,)
+    cursor.execute(sql, data)
+
+    # return empty cart if user has no cart yet
+    if cursor.rowcount == 0:
+        connection.close()
+        return jsonify({
+            "message": "Cart retrieved successfully",
+            "cart": {
+                "id": None,
+                "user_id": user_id,
+                "items": []
+            }
+        })
+
+    cart = cursor.fetchone()
+
+    # get all cart items with product details
+    sql = """select cart_items.id, cart_items.product_id, cart_items.quantity,
+             products.title, products.description, products.price, products.image
+             from cart_items
+             join products on cart_items.product_id = products.product_id
+             where cart_items.cart_id = %s"""
+    data = (cart['id'],)
+    cursor.execute(sql, data)
+    items = cursor.fetchall()
+    connection.close()
+
+    # return cart with all items
+    return jsonify({
+        "message": "Cart retrieved successfully",
+        "cart": {
+            "id": cart['id'],
+            "user_id": cart['user_id'],
+            "items": items
+        }
+    })
+
+
+
 
 # Mpesa Payment Route/Endpoint 
 

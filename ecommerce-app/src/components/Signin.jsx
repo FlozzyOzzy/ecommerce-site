@@ -25,7 +25,8 @@ const Signin = () => {
       const response = await axios.post("http://127.0.0.1:5000/api/signin", data)
       setLoading("")
       if (response.data.user) {
-        navigate("/")
+        localStorage.setItem("user", JSON.stringify(response.data.user))
+        navigate("/getproducts")
       } else {
         setError("Login Failed")
       }
