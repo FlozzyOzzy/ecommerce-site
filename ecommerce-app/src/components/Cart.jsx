@@ -94,7 +94,6 @@ const Cart = () => {
                   <CartItem
                     key={item.id}
                     item_id={item.id}
-                    product_id={item.product_id}
                     title={item.title}
                     description={item.description}
                     price={item.price}
@@ -108,6 +107,15 @@ const Cart = () => {
             <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4">
               <p className="text-lg font-semibold text-gray-900">Total</p>
               <p className="text-2xl font-bold text-gray-900">Ksh {totalPrice.toFixed(2)}</p>
+            </div>
+
+            <div className="border-t border-gray-200 px-6 py-4 text-right">
+              <Link
+                to="/checkout"
+                className="inline-block rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+              >
+                Proceed to Checkout
+              </Link>
             </div>
           </div>
         )}

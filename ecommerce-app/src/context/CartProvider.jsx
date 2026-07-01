@@ -16,6 +16,11 @@ const CartProvider = ({ children }) => {
     return items.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0)
   }, [items])
 
+  // Total number of items in cart (sum of quantities)
+  const cartItemCount = useMemo(() => {
+    return items.reduce((sum, item) => sum + Number(item.quantity), 0)
+  }, [items])
+
   // Fetch cart data without triggering loading state (for useEffect)
   const refreshCart = useCallback(() => {
     const userId = getUserId()
@@ -85,6 +90,7 @@ const CartProvider = ({ children }) => {
     items,
     cartId,
     totalPrice,
+    cartItemCount,
     loading,
     error,
     setError,

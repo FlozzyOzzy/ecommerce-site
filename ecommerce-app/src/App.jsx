@@ -9,6 +9,11 @@ import Cart from './components/Cart'
 import CartProvider from './context/CartProvider'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import CheckoutFlow from './components/CheckoutFlow'
+import OrderDetails from './components/OrderDetails'
+import Profile from './components/Profile'
+import AdminRoute from './components/AdminRoute'
+import ProductDetails from './components/ProductDetails'
 
 function App() {
  
@@ -25,8 +30,12 @@ function App() {
                 <Route path='/signup' element={<Signup />} />
                 <Route path='/signin' element={<Signin />} />
                 <Route path='/getproducts' element={<GetProducts />} />
-                <Route path='/addproducts' element={<AddProducts />} />
+                <Route path='/products/:productId' element={<ProductDetails />} />
+                <Route path='/addproducts' element={<AdminRoute><AddProducts /></AdminRoute>} />
                 <Route path='/cart' element={<Cart />} />
+                <Route path='/checkout' element={<CheckoutFlow />} />
+                <Route path='/orders/:orderId' element={<OrderDetails />} />
+                <Route path='/profile' element={<Profile />} />
                 <Route path='/' element= {<Landingpage/>} />
               </Routes>
             </main>

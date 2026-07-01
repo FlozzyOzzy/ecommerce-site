@@ -3,7 +3,7 @@ import { useCart } from "../hooks/useCart"
 
 const IMG_URL = "http://127.0.0.1:5000/static/images/"
 
-const CartItem = ({ item_id, product_id, title, description, price, quantity, image }) => {
+const CartItem = ({ item_id, title, description, price, quantity, image }) => {
   const { updateQuantity, removeItem } = useCart()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -59,7 +59,6 @@ const CartItem = ({ item_id, product_id, title, description, price, quantity, im
             {description && (
               <p className="mt-1 line-clamp-2 text-sm text-gray-600">{description}</p>
             )}
-            <p className="mt-1 text-xs text-gray-500">Product ID: {product_id}</p>
           </div>
         </div>
       </td>

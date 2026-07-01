@@ -33,7 +33,7 @@ const Signup = () => {
       const response = await axios.post("http://127.0.0.1:5000/api/signup", data)
       setLoading("")
       setSuccess(response.data.success)
-      navigate("/")
+      navigate("/signin")
 
       setFirstname("")
       setLastname("")

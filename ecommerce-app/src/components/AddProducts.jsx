@@ -1,5 +1,6 @@
 import axios from "axios"
 import { useState } from "react"
+import { getStoredUser } from "../utils/authUtils"
 
 const categories = ["Electronics", "Fashion", "Home & Living"]
 
@@ -28,7 +29,9 @@ const AddProducts = () => {
     setSuccess("")
     setError("")
 
+    const user = getStoredUser()
     const data = new FormData()
+    data.append("user_id", user.id)
     data.append("title", title)
     data.append("description", description)
     data.append("category", category)
@@ -48,7 +51,7 @@ const AddProducts = () => {
       setImage(null)
     } catch (error) {
       setLoading("")
-      setError(error.message)
+      setError(error.response?.data?.message || error.message)
     }
   }
 
