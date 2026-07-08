@@ -12,18 +12,25 @@ app = Flask(__name__)
 CORS(app)
 
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 app.config['UPLOAD_FOLDER'] = 'static/images'
 
 
 # AlwaysData MySQL connection settings
-DB_HOST = 'mysql-florencemacharia.alwaysdata.net'
-DB_USER = 'florencemacharia'
-DB_PASSWORD = 'Modcom123'
-DB_NAME = 'florencemacharia_ecommercedatabase'
+DB_HOST = os.environ.get('DB_HOST', 'mysql-florencemacharia.alwaysdata.net')
+DB_USER = os.environ.get('DB_USER', 'florencemacharia')
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
+DB_NAME = os.environ.get('DB_NAME', 'florencemacharia_ecommercedatabase')
 
 
 # create a database connection
 def get_db_connection():
+    if not DB_PASSWORD:
+        raise RuntimeError('DB_PASSWORD environment variable is not set')
+
     return pymysql.connect(
         host=DB_HOST,
         user=DB_USER,
