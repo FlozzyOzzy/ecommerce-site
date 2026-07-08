@@ -1,6 +1,7 @@
 import axios from "axios"
 import { useState } from "react"
 import { getStoredUser } from "../utils/authUtils"
+import { API_BASE } from "../config/api"
 
 const categories = ["Electronics", "Fashion", "Home & Living"]
 
@@ -40,7 +41,7 @@ const AddProducts = () => {
     data.append("stock_quantity", quantity)
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/api/add_product", data)
+      const response = await axios.post(`${API_BASE}/api/add_product`, data)
       setLoading("")
       setSuccess(response.data.Message)
 

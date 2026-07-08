@@ -2,10 +2,8 @@ import axios from "axios"
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import AddToCartButton from "./AddToCartButton"
-
-const IMG_URL = "http://127.0.0.1:5000/static/images/"
-const API_BASE = "http://127.0.0.1:5000"
-const PER_PAGE = 6
+import { API_BASE, IMG_URL } from "../config/api"
+const PER_PAGE = 8
 
 const ProductCard = ({ product }) => (
   <article className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-gray-300 hover:shadow-lg">
@@ -51,7 +49,7 @@ const GetProducts = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
-  // Debounce search input
+  // Debounce search input and reset to page 1
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search)
@@ -65,9 +63,6 @@ const GetProducts = () => {
   useEffect(() => {
     let cancelled = false
 
-    setLoading(true)
-    setError("")
-
     axios
       .get(`${API_BASE}/api/get_product_details`, {
         params: {
@@ -80,6 +75,7 @@ const GetProducts = () => {
         if (!cancelled) {
           setProducts(response.data.products || [])
           setPagination(response.data.pagination || { page: 1, per_page: PER_PAGE, total: 0, total_pages: 0 })
+          setError("")
         }
       })
       .catch((err) => {
@@ -95,6 +91,11 @@ const GetProducts = () => {
       cancelled = true
     }
   }, [debouncedSearch, page])
+
+  const goToPage = (nextPage) => {
+    setLoading(true)
+    setPage(nextPage)
+  }
 
   return (
     <div className="relative flex flex-1 flex-col bg-gray-50">
@@ -119,7 +120,10 @@ const GetProducts = () => {
             id="search"
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value)
+              setLoading(true)
+            }}
             placeholder="Search by name, description, or category..."
             className="block w-full max-w-md rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-800 shadow-sm focus:outline-2 focus:outline-blue-600"
           />
@@ -159,8 +163,8 @@ const GetProducts = () => {
               <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
                 <button
                   type="button"
-                  onClick={() => setPage((p) => p - 1)}
-                  disabled={page <= 1}
+                  onClick={() => goToPage(page - 1)}
+                  disabled={page <= 1 || loading}
                   className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Previous
@@ -170,8 +174,8 @@ const GetProducts = () => {
                 </span>
                 <button
                   type="button"
-                  onClick={() => setPage((p) => p + 1)}
-                  disabled={page >= pagination.total_pages}
+                  onClick={() => goToPage(page + 1)}
+                  disabled={page >= pagination.total_pages || loading}
                   className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Next

@@ -2,8 +2,7 @@ import axios from "axios"
 import { useCallback, useMemo, useState } from "react"
 import { CartContext } from "./cartContext"
 import { getUserId } from "../utils/cartUtils"
-
-const API_BASE = "http://127.0.0.1:5000"
+import { API_BASE } from "../config/api"
 
 const CartProvider = ({ children }) => {
   const [items, setItems] = useState([])
@@ -60,9 +59,9 @@ const CartProvider = ({ children }) => {
     }
 
     const data = new FormData()
-    data.append("user_id", userId)
-    data.append("product_id", productId)
-    data.append("quantity", quantity)
+    data.append("user_id", String(userId))
+    data.append("product_id", String(productId))
+    data.append("quantity", String(quantity))
 
     const response = await axios.post(`${API_BASE}/api/cart/add`, data)
     await refreshCart()

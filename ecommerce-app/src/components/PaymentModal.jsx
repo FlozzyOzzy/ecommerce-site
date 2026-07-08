@@ -1,3 +1,5 @@
+import { formatMpesaPhone } from "../utils/phoneUtils"
+
 const PaymentModal = ({ orderId, totalAmount, phone, onSubmit, onCancel, loading, error }) => {
   // Trigger M-Pesa payment using phone from shipping step
   const handleSubmit = (e) => {
@@ -29,7 +31,8 @@ const PaymentModal = ({ orderId, totalAmount, phone, onSubmit, onCancel, loading
           <p className="text-sm text-gray-800">
             An M-Pesa payment request will be sent to:
           </p>
-          <p className="mt-1 text-base font-semibold text-gray-900">{phone}</p>
+          <p className="mt-1 text-base font-semibold text-gray-900">{formatMpesaPhone(phone)}</p>
+          <p className="mt-2 text-xs text-gray-500">Use the M-Pesa number registered on your Safaricom line.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6">

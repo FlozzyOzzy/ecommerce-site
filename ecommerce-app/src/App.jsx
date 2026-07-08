@@ -21,9 +21,9 @@ function App() {
   return (
     <BrowserRouter>
       <CartProvider>
-        <div className="relative min-h-svh w-full bg-gray-50 font-sans">
+        <div className="relative min-h-screen min-h-svh w-full bg-gray-50 font-sans">
           <div className="fixed inset-0 -z-10 bg-gray-50" aria-hidden="true" />
-          <div className="flex min-h-svh w-full flex-col">
+          <div className="flex min-h-screen min-h-svh w-full flex-col">
             <Navbar />
             <main className="flex flex-1 flex-col">
               <Routes>

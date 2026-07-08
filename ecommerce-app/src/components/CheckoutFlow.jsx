@@ -6,8 +6,8 @@ import CheckoutForm from "./CheckoutForm"
 import OrderReview from "./OrderReview"
 import PaymentModal from "./PaymentModal"
 import OrderConfirmation from "./OrderConfirmation"
-
-const API_BASE = "http://127.0.0.1:5000"
+import { API_BASE } from "../config/api"
+import { formatMpesaPhone, isValidMpesaPhone } from "../utils/phoneUtils"
 
 const CheckoutFlow = () => {
   const navigate = useNavigate()
@@ -81,9 +81,9 @@ const CheckoutFlow = () => {
 
     try {
       const data = new FormData()
-      data.append("user_id", userId)
+      data.append("user_id", String(userId))
       data.append("shipping_address", formData.shipping_address)
-      data.append("phone", formData.phone)
+      data.append("phone", formatMpesaPhone(formData.phone))
 
       const response = await axios.post(`${API_BASE}/api/checkout/initiate`, data)
 
@@ -107,14 +107,21 @@ const CheckoutFlow = () => {
 
   // Process M-Pesa payment and fetch confirmed order
   const handlePayment = async () => {
+    const mpesaPhone = formatMpesaPhone(checkoutData.phone)
+
+    if (!isValidMpesaPhone(checkoutData.phone)) {
+      setError("Enter a valid Kenyan phone number (e.g. 0712345678 or 254712345678).")
+      return
+    }
+
     setLoading(true)
     setError("")
 
     try {
       const data = new FormData()
-      data.append("order_id", orderId)
-      data.append("phone", checkoutData.phone)
-      data.append("amount", totalAmount)
+      data.append("order_id", String(orderId))
+      data.append("phone", mpesaPhone)
+      data.append("amount", Number(totalAmount).toFixed(2))
 
       await axios.post(`${API_BASE}/api/checkout/payment`, data)
 
@@ -122,7 +129,8 @@ const CheckoutFlow = () => {
       setConfirmedOrder(orderResponse.data.order)
       setStep("confirmation")
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Payment failed. Please try again.")
+      const mpesaError = err.response?.data?.error || err.response?.data?.message
+      setError(mpesaError || err.message || "Payment failed. Please try again.")
     } finally {
       setLoading(false)
     }

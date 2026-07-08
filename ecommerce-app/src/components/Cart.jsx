@@ -32,7 +32,7 @@ const Cart = () => {
   const isLoading = pageLoading || loading
 
   return (
-    <div className="relative flex min-h-svh flex-col bg-gray-50">
+    <div className="relative flex min-h-screen min-h-svh flex-col bg-gray-50">
       <section className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8 text-left">
           <span className="inline-flex items-center rounded-full bg-amber-500 px-4 py-1.5 text-xs font-semibold text-white shadow-sm">

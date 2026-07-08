@@ -1,6 +1,8 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 
+import { formatMpesaPhone, isValidMpesaPhone } from "../utils/phoneUtils"
+
 const CheckoutForm = ({ onSubmit, onBackToCart, loading, error, initialValues = {} }) => {
   const [shippingAddress, setShippingAddress] = useState(initialValues.shipping_address || "")
   const [phone, setPhone] = useState(initialValues.phone || "")
@@ -15,10 +17,15 @@ const CheckoutForm = ({ onSubmit, onBackToCart, loading, error, initialValues = 
       return
     }
 
+    if (!isValidMpesaPhone(phone)) {
+      setValidationError("Enter a valid Kenyan phone number (e.g. 0712345678 or 254712345678).")
+      return
+    }
+
     setValidationError("")
     onSubmit({
       shipping_address: shippingAddress.trim(),
-      phone: phone.trim(),
+      phone: formatMpesaPhone(phone),
     })
   }
 
@@ -60,7 +67,7 @@ const CheckoutForm = ({ onSubmit, onBackToCart, loading, error, initialValues = 
             type="text"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="e.g. 254712345678"
+            placeholder="e.g. 0712345678 or 254712345678"
             className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-800 focus:outline-2 focus:outline-blue-600"
             disabled={loading}
           />

@@ -2,9 +2,7 @@ import axios from "axios"
 import { useEffect, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import AddToCartButton from "./AddToCartButton"
-
-const IMG_URL = "http://127.0.0.1:5000/static/images/"
-const API_BASE = "http://127.0.0.1:5000"
+import { API_BASE, IMG_URL } from "../config/api"
 
 const ProductDetails = () => {
   const { productId } = useParams()

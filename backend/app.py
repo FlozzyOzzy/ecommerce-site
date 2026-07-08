@@ -15,9 +15,38 @@ import os
 app.config['UPLOAD_FOLDER'] = 'static/images'
 
 
+# AlwaysData MySQL connection settings
+DB_HOST = 'mysql-florencemacharia.alwaysdata.net'
+DB_USER = 'florencemacharia'
+DB_PASSWORD = 'Modcom123'
+DB_NAME = 'florencemacharia_ecommercedatabase'
+
+
+# create a database connection
+def get_db_connection():
+    return pymysql.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_NAME
+    )
+
+
+# format phone number for M-Pesa
+def format_mpesa_phone(phone):
+    phone = phone.strip().replace(' ', '').replace('-', '')
+    if phone.startswith('+'):
+        phone = phone[1:]
+    if phone.startswith('0'):
+        phone = '254' + phone[1:]
+    elif phone.startswith('7') or phone.startswith('1'):
+        phone = '254' + phone
+    return phone
+
+
 # check if user is admin
 def is_admin(user_id):
-    connection = pymysql.connect(host='localhost', user='root', password='', database='ecommerce')
+    connection = get_db_connection()
     cursor = connection.cursor(pymysql.cursors.DictCursor)
     sql = "select role from users where id = %s"
     data = (user_id,)
@@ -44,7 +73,7 @@ def signup():
     hashed_password = generate_password_hash(password)
             
     # COnnect to DB
-    connection = pymysql.connect(host='localhost', user='root', password='', database='ecommerce')
+    connection = get_db_connection()
     # Do the Cursor, initialize the connection
     cursor = connection.cursor()
 
@@ -73,7 +102,7 @@ def signin():
     password = request.form['password']
             
     # Connect to DB
-    connection = pymysql.connect(host='localhost', user='root', password='',database='ecommerce')
+    connection = get_db_connection()
             
     # Create a cursor to return results a dictionary, initialize connection
     cursor = connection.cursor(pymysql.cursors.DictCursor)
@@ -130,7 +159,7 @@ def get_profile():
         return jsonify({"message": "user_id is required"}), 400
 
     # connecting to the database
-    connection = pymysql.connect(host='localhost', user='root', password='', database='ecommerce')
+    connection = get_db_connection()
     # defining the cursor
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
@@ -203,7 +232,7 @@ def add_product ():
     photo.save(photo_path)
 
     # connecting  to the database
-    connection = pymysql.connect(user= 'root', host= 'localhost', password='', database= 'ecommerce')
+    connection = get_db_connection()
     # defining the cursor
     cursor = connection.cursor()
     # create the sql query
@@ -245,7 +274,7 @@ def get_product_details():
     offset = (page - 1) * per_page
 
     # establish a connection to the database
-    connection = pymysql.connect(user= 'root', password='', host= 'localhost', database= 'ecommerce')
+    connection = get_db_connection()
     # define the cursor
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
@@ -292,7 +321,7 @@ def get_product_details():
 # define the corresponding web application function
 def get_product(product_id):
     # establish a connection to the database
-    connection = pymysql.connect(user= 'root', password='', host= 'localhost', database= 'ecommerce')
+    connection = get_db_connection()
     # define the cursor
     cursor = connection.cursor(pymysql.cursors.DictCursor)
     # define the sql query
@@ -334,7 +363,7 @@ def cart_add():
         return jsonify({"message": "quantity must be greater than zero"})
 
     # connecting to the database
-    connection = pymysql.connect(user= 'root', host= 'localhost', password='', database= 'ecommerce')
+    connection = get_db_connection()
     # defining the cursor
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
@@ -344,7 +373,7 @@ def cart_add():
     cursor.execute(sql, data)
     if cursor.rowcount == 0:
         connection.close()
-        return jsonify({"message": "Product not found"})
+        return jsonify({"message": "Product not found"}), 404
 
     # check if cart exists for user
     sql = "select id from cart where user_id = %s"
@@ -418,7 +447,7 @@ def cart_update(item_id):
         return jsonify({"message": "quantity must be greater than zero"})
 
     # connecting to the database
-    connection = pymysql.connect(user= 'root', host= 'localhost', password='', database= 'ecommerce')
+    connection = get_db_connection()
     # defining the cursor
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
@@ -459,7 +488,7 @@ def cart_update(item_id):
 # define the corresponding web application function
 def cart_delete(item_id):
     # connecting to the database
-    connection = pymysql.connect(user= 'root', host= 'localhost', password='', database= 'ecommerce')
+    connection = get_db_connection()
     # defining the cursor
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
@@ -497,7 +526,7 @@ def cart_get():
         return jsonify({"message": "user_id is required"})
 
     # connecting to the database
-    connection = pymysql.connect(user= 'root', host= 'localhost', password='', database= 'ecommerce')
+    connection = get_db_connection()
     # defining the cursor
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
@@ -546,50 +575,59 @@ def cart_get():
 
 # process M-Pesa STK push payment
 def process_mpesa_payment(phone, amount):
-    # GENERATING THE ACCESS TOKEN
-    # create an account on safaricom daraja
-    consumer_key = "GTWADFxIpUfDoNikNGqq1C3023evM6UH"
-    consumer_secret = "amFbAoUByPV2rM5A"
+    # format phone to M-Pesa required format
+    phone = format_mpesa_phone(phone)
 
-    api_URL = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"  # AUTH URL
-    r = requests.get(api_URL, auth=HTTPBasicAuth(consumer_key, consumer_secret))
+    try:
+        # GENERATING THE ACCESS TOKEN
+        consumer_key = "GTWADFxIpUfDoNikNGqq1C3023evM6UH"
+        consumer_secret = "amFbAoUByPV2rM5A"
 
-    data = r.json()
-    access_token = "Bearer" + ' ' + data['access_token']
+        api_URL = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
+        r = requests.get(api_URL, auth=HTTPBasicAuth(consumer_key, consumer_secret), timeout=30)
 
-    #  GETTING THE PASSWORD
-    timestamp = datetime.datetime.today().strftime('%Y%m%d%H%M%S')
-    passkey = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
-    business_short_code = "174379"
-    data = business_short_code + passkey + timestamp
-    encoded = base64.b64encode(data.encode())
-    password = encoded.decode('utf-8')
+        if r.status_code != 200:
+            return {"ResponseCode": "1", "errorMessage": "Failed to connect to M-Pesa"}
 
-    # BODY OR PAYLOAD
-    payload = {
-        "BusinessShortCode": "174379",
-        "Password": "{}".format(password),
-        "Timestamp": "{}".format(timestamp),
-        "TransactionType": "CustomerPayBillOnline",
-        "Amount": "1",  # use 1 when testing
-        "PartyA": phone,  # change to your number
-        "PartyB": "174379",
-        "PhoneNumber": phone,
-        "CallBackURL": "https://modcom.co.ke/api/confirmation.php",
-        "AccountReference": "account",
-        "TransactionDesc": "account"
-    }
+        data = r.json()
+        if 'access_token' not in data:
+            return {"ResponseCode": "1", "errorMessage": data.get('errorMessage', 'M-Pesa authentication failed')}
 
-    # POPULAING THE HTTP HEADER
-    headers = {
-        "Authorization": access_token,
-        "Content-Type": "application/json"
-    }
+        access_token = "Bearer" + ' ' + data['access_token']
 
-    url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"  # C2B URL
+        # GETTING THE PASSWORD
+        timestamp = datetime.datetime.today().strftime('%Y%m%d%H%M%S')
+        passkey = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
+        business_short_code = "174379"
+        data = business_short_code + passkey + timestamp
+        encoded = base64.b64encode(data.encode())
+        password = encoded.decode('utf-8')
 
-    response = requests.post(url, json=payload, headers=headers)
-    return response.json()
+        # BODY OR PAYLOAD
+        payload = {
+            "BusinessShortCode": "174379",
+            "Password": "{}".format(password),
+            "Timestamp": "{}".format(timestamp),
+            "TransactionType": "CustomerPayBillOnline",
+            "Amount": "1",
+            "PartyA": phone,
+            "PartyB": "174379",
+            "PhoneNumber": phone,
+            "CallBackURL": "https://modcom.co.ke/api/confirmation.php",
+            "AccountReference": "account",
+            "TransactionDesc": "account"
+        }
+
+        headers = {
+            "Authorization": access_token,
+            "Content-Type": "application/json"
+        }
+
+        url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
+        response = requests.post(url, json=payload, headers=headers, timeout=30)
+        return response.json()
+    except Exception as e:
+        return {"ResponseCode": "1", "errorMessage": str(e)}
 
 
 
@@ -613,7 +651,7 @@ def checkout_initiate():
         return jsonify({"message": "shipping_address and phone cannot be empty"}), 400
 
     # connecting to the database
-    connection = pymysql.connect(user= 'root', host= 'localhost', password='', database= 'ecommerce')
+    connection = get_db_connection()
     # defining the cursor
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
@@ -724,7 +762,7 @@ def checkout_payment():
         return jsonify({"message": "phone cannot be empty"}), 400
 
     # connecting to the database
-    connection = pymysql.connect(user= 'root', host= 'localhost', password='', database= 'ecommerce')
+    connection = get_db_connection()
     # defining the cursor
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
@@ -739,9 +777,12 @@ def checkout_payment():
     order = cursor.fetchone()
 
     # validate amount matches order total
-    if float(amount) != float(order['total_amount']):
+    if abs(float(amount) - float(order['total_amount'])) > 0.01:
         connection.close()
         return jsonify({"message": "Amount does not match order total"}), 400
+
+    # format phone for M-Pesa
+    phone = format_mpesa_phone(phone)
 
     # call M-Pesa payment API
     mpesa_response = process_mpesa_payment(phone, amount)
@@ -768,7 +809,8 @@ def checkout_payment():
         return jsonify({
             "message": "Payment failed",
             "order_id": order_id,
-            "mpesa_response": mpesa_response
+            "mpesa_response": mpesa_response,
+            "error": mpesa_response.get('errorMessage') or mpesa_response.get('ResponseDescription', 'Payment failed')
         }), 400
 
 
@@ -787,7 +829,7 @@ def orders_list():
         return jsonify({"message": "user_id is required"}), 400
 
     # connecting to the database
-    connection = pymysql.connect(user= 'root', host= 'localhost', password='', database= 'ecommerce')
+    connection = get_db_connection()
     # defining the cursor
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
@@ -837,7 +879,7 @@ def orders_list():
 # define the corresponding web application function
 def order_get(order_id):
     # connecting to the database
-    connection = pymysql.connect(user= 'root', host= 'localhost', password='', database= 'ecommerce')
+    connection = get_db_connection()
     # defining the cursor
     cursor = connection.cursor(pymysql.cursors.DictCursor)
 
@@ -895,5 +937,5 @@ def mpesa_payment():
 
 
 # Run the app if this file is executed directly
-if __name__ == '__main__':
-    app.run(debug=True)
+# if __name__ == '__main__':
+#     app.run(debug=True)

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useCart } from "../hooks/useCart"
 
-const IMG_URL = "http://127.0.0.1:5000/static/images/"
+import { API_BASE, IMG_URL } from "../config/api"
 
 const CartItem = ({ item_id, title, description, price, quantity, image }) => {
   const { updateQuantity, removeItem } = useCart()

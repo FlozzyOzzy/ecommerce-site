@@ -1,6 +1,7 @@
 import axios from "axios"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import { API_BASE } from "../config/api"
 
 const inputClassName =
   "block w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-base text-gray-800 shadow-sm transition placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-blue-600 sm:text-sm"
@@ -30,7 +31,7 @@ const Signup = () => {
     data.append("password", password)
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/api/signup", data)
+      const response = await axios.post(`${API_BASE}/api/signup`, data)
       setLoading("")
       setSuccess(response.data.success)
       navigate("/signin")
