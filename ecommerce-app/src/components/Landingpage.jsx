@@ -1,8 +1,32 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
+import heroOne from "../assets/artem-beliaikin-pPzQP35zh4o-unsplash.jpg"
+import heroTwo from "../assets/tamanna-rumee-lpGm415q9JA-unsplash.jpg"
+import heroThree from "../assets/growtika-mlpsHpUUCHY-unsplash.jpg"
+
+const HERO_SLIDES = [
+  { src: heroOne, alt: "Colorful shopping bags on display" },
+  { src: heroTwo, alt: "Fashion and lifestyle products" },
+  { src: heroThree, alt: "Curated products ready to shop" },
+]
+
+const AUTO_PLAY_MS = 5000
 
 const Landingpage = () => {
   const [mouse, setMouse] = useState({ x: 0, y: 0 })
+  const [activeSlide, setActiveSlide] = useState(0)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide((current) => (current + 1) % HERO_SLIDES.length)
+    }, AUTO_PLAY_MS)
+
+    return () => clearInterval(timer)
+  }, [])
+
+  const goToSlide = (index) => {
+    setActiveSlide((index + HERO_SLIDES.length) % HERO_SLIDES.length)
+  }
 
   const handleMouseMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -62,23 +86,49 @@ const Landingpage = () => {
         >
           <div className="absolute -inset-4 rounded-3xl bg-linear-to-br from-amber-100/60 via-white to-gray-100/80 blur-xl" />
           <div className="relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-4 shadow-2xl">
-            <img
-              src="/landing-hero.svg"
-              alt="E-commerce shopping showcase"
-              className="w-full rounded-2xl object-cover transition duration-500 hover:scale-[1.02]"
-            />
-            <div className="absolute bottom-8 left-8 right-8 rounded-2xl border border-amber-200 bg-white p-4 shadow-lg">
-              <span className="mb-1 inline-block rounded-full bg-amber-500 px-2.5 py-0.5 text-xs font-semibold text-white">
-                Limited offer
-              </span>
-              <p className="text-sm font-semibold text-gray-900">Weekend flash deals</p>
-              <p className="mt-1 text-xs text-gray-800">Up to 30% off on selected categories today.</p>
-            </div>
-          </div>
+            <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-gray-100">
+              {HERO_SLIDES.map((slide, index) => (
+                <img
+                  key={slide.src}
+                  src={slide.src}
+                  alt={slide.alt}
+                  className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out ${
+                    index === activeSlide ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+              ))}
 
-          <div className="absolute -right-3 top-8 hidden rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-lg transition duration-300 hover:-translate-y-1 sm:block">
-            <p className="text-xs text-gray-800">Orders today</p>
-            <p className="text-lg font-semibold text-amber-500">2,480+</p>
+              <button
+                type="button"
+                onClick={() => goToSlide(activeSlide - 1)}
+                aria-label="Previous slide"
+                className="absolute left-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-900 shadow-md transition hover:bg-white"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={() => goToSlide(activeSlide + 1)}
+                aria-label="Next slide"
+                className="absolute right-3 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-gray-900 shadow-md transition hover:bg-white"
+              >
+                ›
+              </button>
+
+              <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+                {HERO_SLIDES.map((slide, index) => (
+                  <button
+                    key={slide.src}
+                    type="button"
+                    onClick={() => goToSlide(index)}
+                    aria-label={`Go to slide ${index + 1}`}
+                    className={`h-2.5 rounded-full transition-all duration-300 ${
+                      index === activeSlide ? "w-7 bg-amber-500" : "w-2.5 bg-white/80 hover:bg-white"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
